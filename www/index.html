@@ -7,6 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#235048">
 <script src="native-notify.js" defer></script>
+<script src="push-fcm.js" defer></script>
 <meta name="application-name" content="Nanda Tasks">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -647,7 +648,7 @@ window.FIREBASE_CONFIG = {
   messagingSenderId: "497939246491",
   appId: "1:497939246491:web:a31ff8e9f88e64b19f853e"
 };
-window.APP_VERSION="v2026-06-13.51";   // bump this each deploy so you can see which build is live
+window.APP_VERSION="v2026-06-13.53";   // bump this each deploy so you can see which build is live
 
 (function(){
   var cfg = window.FIREBASE_CONFIG;
@@ -1036,6 +1037,11 @@ window.APP_VERSION="v2026-06-13.51";   // bump this each deploy so you can see w
     <div class="aset-block" id="pushBlock"><span class="aset-lbl">📲 Notifications when the app is closed</span>
       <p class="panel-sub" id="pushStatus" style="margin:4px 0 9px">Get task reminders even when the app isn't open.</p>
       <div class="rem-btns"><button class="add" id="pushEnable">Turn on</button><button class="act mini" id="pushTest">🔔 Test now</button></div>
+    </div>
+    <div class="aset-block" id="fcmBlock" style="display:none"><span class="aset-lbl">📡 Push setup token</span>
+      <p class="panel-sub" id="fcmStatus" style="margin:4px 0 9px">Used once to test push notifications.</p>
+      <textarea id="fcmToken" readonly style="width:100%;height:64px;font-size:11px;font-family:monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface);color:var(--ink);resize:none"></textarea>
+      <div class="rem-btns" style="margin-top:6px"><button class="add" id="fcmCopy">📋 Copy token</button></div>
     </div>
     <div class="rem-btns" style="margin-top:16px"><button class="add" id="alarmTest">🔔 Test alarm</button><button class="ghost" id="alarmClose">Close</button></div>
   </div>
@@ -1960,7 +1966,27 @@ window.APP_VERSION="v2026-06-13.51";   // bump this each deploy so you can see w
     if(btn){ btn.disabled=false; btn.textContent = on ? "Turn off" : "Turn on"; btn.onclick = on ? disablePush : enablePush; }
   }
   window.__enablePush=enablePush; window.__updatePushStatus=updatePushStatus;
-  function openAlarmSettings(){ initAudio(); renderAlarmSettings(); updatePushStatus(); const m=el("alarmModal"); if(m)m.classList.remove("hidden"); }
+  /* ---- FCM server-push token: save per user + show for setup test ---- */
+  function saveFcmToken(token){
+    if(!token) return;
+    try{ window.storage.set("push-token:"+boardUser(), JSON.stringify({ user:boardUser(), name:boardName||boardUser(), token:token, ts:Date.now() })); }catch(e){}
+    showFcmToken();
+  }
+  window.__onFcmToken=saveFcmToken;
+  function showFcmToken(){
+    var blk=el("fcmBlock"), ta=el("fcmToken"), st=el("fcmStatus"); if(!blk) return;
+    var tok=window.__nandaFcmToken;
+    if(tok){
+      blk.style.display=""; if(ta)ta.value=tok;
+      if(st)st.textContent="Copy this and paste it in Firebase → Cloud Messaging → Send test message.";
+    } else if(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()){
+      blk.style.display=""; if(st)st.textContent="Preparing push token… reopen this in a few seconds.";
+    } else {
+      blk.style.display="none";   // web: nothing to show
+    }
+  }
+  window.__updatePushStatus=updatePushStatus;
+  function openAlarmSettings(){ initAudio(); renderAlarmSettings(); updatePushStatus(); showFcmToken(); const m=el("alarmModal"); if(m)m.classList.remove("hidden"); }
   function closeAlarmSettings(){ const m=el("alarmModal"); if(m)m.classList.add("hidden"); }
   let alarmEl=null;
   const ALARM_SOUNDS=["siren","buzzer","chime","beep","pulse","bell"];
@@ -2088,6 +2114,7 @@ window.APP_VERSION="v2026-06-13.51";   // bump this each deploy so you can see w
   if(el("myKeyDatesModal")) el("myKeyDatesModal").addEventListener("click",e=>{ if(e.target.id==="myKeyDatesModal")el("myKeyDatesModal").classList.add("hidden"); });
   if(el("alarmClose")) el("alarmClose").addEventListener("click",closeAlarmSettings);
   if(el("pushTest")) el("pushTest").addEventListener("click",testPush);
+  if(el("fcmCopy")) el("fcmCopy").addEventListener("click",function(){ var ta=el("fcmToken"); if(ta&&ta.value){ try{ navigator.clipboard.writeText(ta.value); }catch(e){ ta.select&&ta.select(); } toast("Token copied"); } else { toast("No token yet — reopen in a few seconds"); } });
   if(el("alarmModal")) el("alarmModal").addEventListener("click",e=>{ if(e.target.id==="alarmModal")closeAlarmSettings(); });
   if(el("vibToggle")) el("vibToggle").addEventListener("click",()=>{ state.vibrate=!(state.vibrate!==false); renderAlarmSettings(); save(); if(state.vibrate)buzz([200,100,200]); });
   if(el("volBtns")) el("volBtns").addEventListener("click",e=>{ const b=e.target.closest("button[data-vol]"); if(!b)return; state.alarmVol=parseFloat(b.dataset.vol); renderAlarmSettings(); save(); initAudio(); if(state.alarmVol>0)beepBurst(); });
