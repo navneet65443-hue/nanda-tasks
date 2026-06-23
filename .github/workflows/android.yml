@@ -43,6 +43,13 @@ jobs:
           mkdir -p android/app/src/main/res/drawable
           cp resources/ic_stat_icon.png android/app/src/main/res/drawable/ic_stat_icon.png
 
+      - name: Add exact-alarm permissions (reliable on-time reminders)
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />\n    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />\n</manifest>#' "$MANIFEST"
+          echo "----- AndroidManifest.xml after patch -----"
+          cat "$MANIFEST"
+
       - name: Build the debug APK
         run: |
           cd android
