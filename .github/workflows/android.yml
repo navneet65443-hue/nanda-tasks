@@ -43,6 +43,11 @@ jobs:
           mkdir -p android/app/src/main/res/drawable
           cp resources/ic_stat_icon.png android/app/src/main/res/drawable/ic_stat_icon.png
 
+      - name: Add the alarm sound
+        run: |
+          mkdir -p android/app/src/main/res/raw
+          cp resources/alarm_tone.wav android/app/src/main/res/raw/alarm_tone.wav
+
       - name: Add exact-alarm permissions (reliable on-time reminders)
         run: |
           MANIFEST=android/app/src/main/AndroidManifest.xml
