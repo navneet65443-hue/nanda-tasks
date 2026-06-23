@@ -35,6 +35,9 @@ jobs:
       - name: Add the Android project
         run: npx cap add android
 
+      - name: Add Firebase config for push
+        run: cp google-services.json android/app/google-services.json
+
       - name: Sync web assets into Android
         run: npx cap sync android
 
@@ -42,11 +45,6 @@ jobs:
         run: |
           mkdir -p android/app/src/main/res/drawable
           cp resources/ic_stat_icon.png android/app/src/main/res/drawable/ic_stat_icon.png
-
-      - name: Add the alarm sound
-        run: |
-          mkdir -p android/app/src/main/res/raw
-          cp resources/alarm_tone.wav android/app/src/main/res/raw/alarm_tone.wav
 
       - name: Add exact-alarm permissions (reliable on-time reminders)
         run: |
