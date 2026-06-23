@@ -2,6 +2,10 @@
   "appId": "com.nandafruits.tasks",
   "appName": "Nanda Tasks",
   "webDir": "www",
+  "server": {
+    "url": "https://nanda-fruits.mis-cc8.workers.dev",
+    "cleartext": false
+  },
   "android": {
     "allowMixedContent": true
   },
