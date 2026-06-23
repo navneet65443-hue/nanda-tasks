@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "497939246491",
+    "project_id": "nanda-tasks",
+    "storage_bucket": "nanda-tasks.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497939246491:android:754d38019d2b08d29f853e",
+        "android_client_info": {
+          "package_name": "com.nandafruits.tasks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzDhGrodxZg4B3DFu5Z9vS3K5frR9Lg-I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
